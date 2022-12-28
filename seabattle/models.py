@@ -1,11 +1,8 @@
 import random
-from tools import ship_checks, transform_input, shot_check, empty, damaged, missed, destroyed
+from tools import ship_checks, transform_input, shot_check, empty, damaged, missed, destroyed, win_conditions, \
+    ship_form, ships_nearby_check
 
-# empty = ' '
-# damaged = 'o'
-# destroyed = 'X'
-# missed = '*'
-# ship_point = 'O'
+
 ways = [1, 10]
 
 
@@ -49,11 +46,20 @@ class Field:
               )
 
 
+class Ship:
+    def __init__(self, size):
+        self.size = size
+        self.coordinates = []
+        self.damage = 0
+
+
 class Player:
     def __init__(self, name):
         self.name = name
         # self.turn = turn
         self.field = Field()
+
+    ship = Ship
 
     def ship_perform(self):
         while len(self.field.ships) != 10:
@@ -107,17 +113,11 @@ class Player:
                 print('\nEnter the correct coordinate! ')
 
 
-# class Ship:
-#     def __init__(self, size):
-#         self.size = size
-#         self.coordinates = []
-#         self.damage = 0
-
-
 class Computer(Player):
-    def __init__(self, name):
+    def __init__(self, name, difficulty):
         super().__init__(name)
         self.aim = []
+        self.difficulty = difficulty
 
     def ship_perform(self):
         for size in self.field.ships_amount:
@@ -145,32 +145,28 @@ class Computer(Player):
         while True:
             if len(self.aim) == 0:
                 shot_var = random.randint(0, 99)
-                result = shot_check(attacked_player, shot_var)
-                if result == damaged:
-                    self.aim.append(shot_var)
-                    print('Damaged!')
-                    attacked_player.field.visualisation(attacked_player.field.battle_field)
-                    input('\nPress any key to continue\n')
-                elif result == destroyed:
-                    self.aim = []
-                    print('Destroyed!')
-                    attacked_player.field.visualisation(attacked_player.field.battle_field)
-                    input('\nPress any key to continue\n')
-                elif result == missed:
-                    print('Missed!')
-                    return None
-                # attacked_player.field.visualisation(attacked_player.field.battle_field)
+
             elif len(self.aim) > 1:
-                # for i in self.aim:
-                #     for g in self.aim:
                 way = int(((self.aim[0] - self.aim[1]) ** 2) ** 0.5)
                 shot_var = max(self.aim) + way
 
-                while True:
-                    if shot_var < 100:
+            else:
+                way = random.choice(shot_ways)
+                shot_var = self.aim[0] + way
+
+            while True:
+                try:
+                    test_aim = self.aim + [shot_var]
+                    if len(self.aim) != 0:
+                        ship_form(test_aim)
+                    if self.difficulty == '3':
+                        ships_nearby_check(test_aim, attacked_player.field.battle_field, destroyed)
+
+                    if 100 > shot_var >= 0:
                         result = shot_check(attacked_player, shot_var)
                         if result == damaged:
-                            self.aim.append(shot_var)
+                            if self.difficulty != '1':
+                                self.aim.append(shot_var)
                             print('Damaged!')
                             attacked_player.field.visualisation(attacked_player.field.battle_field)
                             input('\nPress any key to continue\n')
@@ -179,34 +175,30 @@ class Computer(Player):
                             self.aim = []
                             print('Destroyed!')
                             attacked_player.field.visualisation(attacked_player.field.battle_field)
+                            win_conditions(attacked_player)
                             input('\nPress any key to continue\n')
                             break
                         elif result == missed:
                             print('Missed!')
                             return None
                         else:
-                            shot_var = min(self.aim) - way
+                            if len(self.aim) > 1:
+                                shot_var = min(self.aim) - way
+                            else:
+                                break
 
                     else:
+                        if len(self.aim) > 1:
+                            shot_var = min(self.aim) - way
+                        else:
+                            break
+                except TypeError:
+                    if len(self.aim) > 1:
                         shot_var = min(self.aim) - way
-
-            elif len(self.aim) == 1:
-                way = random.choice(shot_ways)
-                shot_var = self.aim[0] + way
-                if shot_var < 100:
-                    result = shot_check(attacked_player, shot_var)
-                    if result == damaged:
-                        self.aim.append(shot_var)
-                        print('Damaged!')
-                        attacked_player.field.visualisation(attacked_player.field.battle_field)
-                        input('\nPress any key to continue\n')
-                    elif result == destroyed:
-                        self.aim = []
-                        print('Destroyed!')
-                        attacked_player.field.visualisation(attacked_player.field.battle_field)
-                        input('\nPress any key to continue\n')
-                    elif result == missed:
-                        print('Missed!')
-                        return None
-                    # attacked_player.field.visualisation(attacked_player.field.battle_field)
-
+                    else:
+                        break
+                except KeyError:
+                    if len(self.aim) > 1:
+                        shot_var = min(self.aim) - way
+                    else:
+                        break

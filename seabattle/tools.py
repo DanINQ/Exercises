@@ -5,13 +5,6 @@ missed = '*'
 ship_point = 'O'
 
 
-class Ship:
-    def __init__(self, size):
-        self.size = size
-        self.coordinates = []
-        self.damage = 0
-
-
 def transform_input(input_coordinate):
     numbers = {
         '1': list(range(0, 10)),
@@ -91,7 +84,7 @@ def ship_form(coordinates):
     raise TypeError
 
 
-def ships_nearby_check(coordinates, player):
+def ships_nearby_check(coordinates, field, point):
     borders = {
         (0,): [-1, -10, -11],
         (9,): [1, -9, -10],
@@ -107,92 +100,27 @@ def ships_nearby_check(coordinates, player):
         for border in borders:
             if place in border:
                 for i in borders[border]:
-                    if player.field.ships_field[place - i] == ship_point:
+                    if field[place - i] == point:
                         raise KeyError
                 matches += 1
                 break
         if matches == 0:
             for i in [-1, -9, -10, -11, 1, 9, 10, 11]:
-                if player.field.ships_field[place - i] == ship_point:
+                if field[place - i] == point:
                     raise KeyError
-
-
-# def ship_perform(player):
-#     while True:
-#         try:
-#             size = input(player.name + '\nEnter the ship size: \n')
-#             if size in player.field.ships_amount and player.field.ships_amount[size] != 0:
-#                 coordinate_input = input(player.name +
-#                                          "\nEnter the ship coordinates dividing them by a comma ',',"
-#                                          " and each by a space ' '\n"
-#                                          "Like that 'Б 2,В 3,Г 9': \n")
-#                 text_coordinates = coordinate_input.upper().split(',')
-#                 coordinates = [transform_input(i) for i in text_coordinates]
-#
-#                 if len(coordinates) == int(size) and None not in coordinates:
-#                     same_places_check(coordinates)
-#                     is_place_free(coordinates, player)
-#                     ship_form(coordinates)
-#                     ships_nearby_check(coordinates, player)
-#                     ship = Ship(int(size))
-#                     player.field.ships.append(ship)
-#                     ship.coordinates = coordinates
-#                     for i in coordinates:
-#                         player.field.ships_field[i] = ship_point
-#                     player.field.ships_amount[size] -= 1
-#                     break
-#                 else:
-#                     print('Not enough coordinates!\n')
-#
-#         except ValueError as v:
-#             print('Oops! This place is already busy! \n', v)
-#         except IndexError as i:
-#             print('Do not enter same values please! \n', i)
-#         except TypeError as e:
-#             print("Nope! This ship can't be created! \n", e)
-#         except KeyError as k:
-#             print("Can't place ship here!", k)
 
 
 def ship_checks(player, coordinates, size):
     same_places_check(coordinates)
     is_place_free(coordinates, player)
     ship_form(coordinates)
-    ships_nearby_check(coordinates, player)
-    ship = Ship(int(size))
+    ships_nearby_check(coordinates, player.field.ships_field, ship_point)
+    ship = player.ship(int(size))
     player.field.ships.append(ship)
     ship.coordinates = coordinates
     for i in coordinates:
         player.field.ships_field[i] = ship_point
     player.field.ships_amount[size] -= 1
-
-
-# def shot_perform(defense_player, player_name):
-#     while True:
-#         input_shot = input(player_name +
-#                            ' Enter the shot coordinate: ')
-#         shot = transform_input(input_shot.upper())
-#
-#         if shot is not None:
-#             if defense_player.field.battle_field[shot] == empty:
-#
-#                 for ship in defense_player.field.ships:
-#                     if shot in ship.coordinates:
-#                         defense_player.field.battle_field[shot] = damaged
-#                         ship.damage += 1
-#                         if ship.damage == ship.size:
-#                             print('\nShip Destroyed!\n ')
-#                         else:
-#                             print('\nDamaged!\n')
-#                         return True
-#                 defense_player.field.battle_field[shot] = missed
-#                 print('\nNope! You missed!\n')
-#                 return False
-#
-#             else:
-#                 print('Can not shoot here! ')
-#         else:
-#             print('Enter the correct coordinate! ')
 
 
 def shot_check(attacked_player, shot):
@@ -223,4 +151,4 @@ def win_conditions(player):
             for i in ship.coordinates:
                 player.field.battle_field[i] = destroyed
     if destroyed_ships == len(player.field.ships):
-        return True
+        raise RuntimeError
