@@ -1,0 +1,11 @@
+Posts list:
+
+
+{% for post in posts %}
+Post ID: {{post.id}}
+
+                    Title: {{post.title}}
+                    
+                    {{post.message}}
+
+{% endfor %}

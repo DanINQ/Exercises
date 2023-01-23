@@ -1,0 +1,17 @@
+Post №{{post.id}}
+
+                Title: {{post.title}}
+                
+                {{post.message}}
+
+
+Comments({{ comments|length }}):
+{% for comment in comments %}
+
+Comment ID: {{comment.id}}
+
+{{comment.message}}
+
+Date: {{comment.date}}
+______________________
+{% endfor %}
