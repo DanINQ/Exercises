@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset=utf-8>
+	<script type="application/javascript" src="https://unpkg.com/jquery@3.2.0"></script> 
+		<!-- Compressed CSS -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/foundation-sites@6.7.5/dist/css/foundation.min.css" crossorigin="anonymous">
+	
+	<!-- Compressed JavaScript -->
+	<script src="https://cdn.jsdelivr.net/npm/foundation-sites@6.7.5/dist/js/foundation.min.js" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="{% static 'main_styles.css' %}" type="text/css">
+	<title>INQBlog</title>
+</head>
+
+
+
+<body>
+	<div class="common">
+		<h1>
+			Megahypeblog
+		</h1>
+
+		<h2 class="new_post">
+			New post:
+		</h2>
+
+		<div class="post_input">
+
+			<div class="grid-y grid-padding-y">
+				<form action="http://127.0.0.1:8000/newpost/" method="POST">
+					{% csrf_token %}
+					<div>
+						Title
+						<input class="title_input" type="text" placeholder="Title" name="title">
+					</div>
+					<div>
+						Message
+						<textarea class="message_input" name="message" placeholder="Message"></textarea>
+					</div>
+					<div>
+					  	<input type="submit" class="button success" value="Create">
+					</div>
+				</form>
+			</div>
+			<div class="reveal" id="modal" data-reveal>
+  				<h3>Oops!</h3>
+  				<p>Looks like you entered invalid data</p>
+  				<button class="close-button" data-close aria-label="Close modal" type="button">
+    				<span aria-hidden="true">&times;</span>
+	  			</button>
+			</div>
+		</div>
+
+		<script type="application/javascript" src="{% static 'post_submit.js' %}"></script>
+
+		<div class="main"> 
+
+			<h2 class="posts">
+				Posts: {{ posts|length }}
+			</h2>
+
+			{% for post in posts %}
+
+			<div class="post">
+				<h3 class="post_id">
+				<a class="button" 
+				href="http://127.0.0.1:8000/get_post/{{post.id}}">Post ID: {{post.id}}
+				</a>
+				</h3>
+
+				<div class="title">
+				Title: {{post.title}} 
+				</div>
+
+				<div class="message">
+					{{post.message}}
+				</div>
+
+				<div class="date">
+					{{post.date}}
+				</div>
+			</div>
+
+			{% endfor %}
+		</div>
+	</div>
+
+
+</body>
+</html>
